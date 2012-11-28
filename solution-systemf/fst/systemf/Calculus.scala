@@ -17,27 +17,27 @@ class Calculus extends ICalculus[Term,Type,Unit,Unit] {
   type Type = Syntax.Type;
   
   // TODO: implement
-  override def mkVar(i : Int, n : Int) = notSupported;
-  override def mkAbs(v : String, ty: Type, t: Term) = notSupported;
-  override def mkApp(f : Term, a : Term) = notSupported;
+  override def mkVar(i : Int, n : Int) = Var(i,n);
+  override def mkAbs(v : String, ty: Type, t: Term) = Abs(v, ty, t);
+  override def mkApp(f : Term, a : Term) = App(f, a); 
   
-  override def mkTArr(t1 : Type, t2: Type) = notSupported;
+  override def mkTArr(t1 : Type, t2: Type) = TArr(t1, t2);
   
-  override def mkTAll(t: Type, v: String) = notSupported;
-  override def mkTVar(i: Int, n: Int) = notSupported;
-  override def mkTApp(t: Term, ty: Type) = notSupported;
-  override def mkTAbs(t: Term, v: String) = notSupported;
+  override def mkTAll(t: Type, v: String) = TUni(v, t);
+  override def mkTVar(i: Int, n: Int) = TVar(i, n);
+  override def mkTApp(t: Term, ty: Type) = TApp(t, ty);
+  override def mkTAbs(t: Term, v: String) = TAbs(v, t);
   
-  override def mkBool = notSupported;
-  override def mkTrue = notSupported;
-  override def mkFalse = notSupported;
-  override def mkIfThenElse(c: Term, e1: Term, e2: Term) = notSupported;
+  override def mkBool = TBool;
+  override def mkTrue = True;
+  override def mkFalse = False;
+  override def mkIfThenElse(c: Term, e1: Term, e2: Term) = If(c,e1,e2);
   
-  override def mkNat = notSupported;
-  override def mkZero = notSupported;
-  override def mkSucc(e: Term) = notSupported;
-  override def mkPred(e: Term) = notSupported;
-  override def mkIsZero(e: Term) = notSupported;
+  override def mkNat = TNat;
+  override def mkZero = Zero;
+  override def mkSucc(e: Term) = Succ(e);
+  override def mkPred(e: Term) = Pred(e);
+  override def mkIsZero(e: Term) = IsZero(e);
   
   override def mkFixp = notSupported;
   
