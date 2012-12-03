@@ -70,7 +70,14 @@ class Evaluator(tcalc: TypeCalculator) {
                   case App(t1,t2) => App(tSubst(t1,v,s),tSubst(t2,v,s))
                   case TApp(t1, t2) => TApp(tSubst(t1, v, s), t2)
                   case Var(i,n) => assert(i!=v); Var(i,n)
-                  case Abs(nh,ty,t1) => Abs(nh,ty,tSubst(t1,v+1,tshift(s,1,0)))
+                  case Abs(nh,ty,t1) => {
+                    //TODO check
+                	  val newTy = ty match{
+                	  	case TVar(i,n) => if(i == v) s else ty  
+                	  	case _  => ty 
+                	  }
+                	  Abs(nh,newTy,tSubst(t1,v+1,tshift(s,1,0)))
+                  	}
                   case TAbs(nh, t) => TAbs(nh, tSubst(t, v+1, tshift(s, 1, 0)))
           }
       

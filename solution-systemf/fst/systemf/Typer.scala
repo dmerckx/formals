@@ -46,12 +46,12 @@ class Typer(tcalc: TypeCalculator) {
                             case _ => throw TypeException
                 	   }
                   }
-                  case Var(i,n) => {						// T-VAR 
+                  case Var(i,n) => {											// T-VAR 
                     ctx(i) match {
                       case Left(j) => j
                       case _ => throw TypeException
                     }
-                  }             
+                  }
                   case Abs(nh,tT,t1) => {                                       // T-ABS
                         val tT1 = typeOf(t1,(Left(tT) :: ctx));
                         TArr(tT,tT1)

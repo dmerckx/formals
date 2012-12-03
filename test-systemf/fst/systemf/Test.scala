@@ -53,6 +53,7 @@ class Test extends FunSuite with ShouldMatchers {
         i = i + 1
     }
 
+    //Parse expression 0 -> 4
     parseTest(
             """(\x : Bool -> (Bool -> Bool) -> Bool -> Bool.x)""",
             calc.mkAbs("x",calc.mkTArr(calc.mkBool,calc.mkTArr(calc.mkTArr(calc.mkBool,calc.mkBool),calc.mkTArr(calc.mkBool,calc.mkBool))),calc.mkVar(0,1)));
@@ -69,17 +70,22 @@ class Test extends FunSuite with ShouldMatchers {
             """ (\b:Bool->Bool->Bool. \t:Bool. \f:Bool. b t f) (\x:Bool. \y:Bool.y) true false """,
             calc.mkApp(calc.mkApp(calc.mkApp(calc.mkAbs("b",calc.mkTArr(calc.mkBool,calc.mkTArr(calc.mkBool,calc.mkBool)),calc.mkAbs("t",calc.mkBool,calc.mkAbs("f",calc.mkBool,calc.mkApp(calc.mkApp(calc.mkVar(2,3),calc.mkVar(1,3)),calc.mkVar(0,3))))),calc.mkAbs("x",calc.mkBool,calc.mkAbs("y",calc.mkBool,calc.mkVar(0,2)))),calc.mkTrue),calc.mkFalse));
 
+    //Type and evaluate expression 5
     evaluateAndTypeTest("let x : Bool = true in (if x then 3 else 2)", calc.mkNat, calc.mkNatLit(3));
     evaluateAndTypeTest("succ 0 ", calc.mkNat, calc.mkNatLit(1));
     evaluateAndTypeTest("succ pred 0", calc.mkNat, calc.mkNatLit(1));
     evaluateAndTypeTest("if true then false else true", calc.mkBool,calc.mkFalse);
     evaluateAndTypeTest("iszero pred 0", calc.mkBool, calc.mkTrue);
+    
+    //Type and evaluate expression 10
     evaluateAndTypeTest("if iszero pred 0 then succ 0 else pred succ 0", calc.mkNat, calc.mkNatLit(1));
     evaluateAndTypeTest("if iszero 0 then succ 0 else 0", calc.mkNat, calc.mkNatLit(1));
     evaluateAndTypeTest("if iszero succ 0 then true else false",calc.mkBool,calc.mkFalse);
     evaluateAndTypeTest("0",calc.mkNat,calc.mkZero);
     evaluateAndTypeTest(""" \x:Bool. \y:Bool.x """, 
             calc.mkTArr(calc.mkBool,calc.mkTArr(calc.mkBool,calc.mkBool)),calc.mkAbs("x",calc.mkBool,calc.mkAbs("y",calc.mkBool,calc.mkVar(1,2)))); // the encoded boolean true over the Bool type
+    
+    //Type and evaluate expression 15
     evaluateAndTypeTest(""" \x:Bool. \y:Bool.y """, 
             calc.mkTArr(calc.mkBool,calc.mkTArr(calc.mkBool,calc.mkBool)),calc.mkAbs("x",calc.mkBool,calc.mkAbs("y",calc.mkBool,calc.mkVar(0,2)))); // the encoded boolean false over the Bool type
     evaluateAndTypeTest(""" \b:Bool->Bool->Bool. \t:Bool. \f:Bool. b t f """, 
@@ -88,6 +94,8 @@ class Test extends FunSuite with ShouldMatchers {
     evaluateAndTypeTest(""" (\b:Bool->Bool->Bool. \t:Bool. \f:Bool. b t f) (\x:Bool. \y:Bool.y) true false """, calc.mkBool, calc.mkFalse); // conditional applied to false
     evaluateAndTypeTest("""(\x:Bool. if x then 0 else 1) true""",calc.mkNat,calc.mkZero);
     evaluateAndTypeTest("""(\f:Nat->Nat. \n:Nat.f (f n)) (\n:Nat. succ n) 0""", calc.mkNat, calc.mkNatLit(2));
+    
+    //Type and evaluate expression 20
     evaluateAndTypeTest("""(\f:Nat->Nat. \n:Nat.f (f n)) ((\f:Nat->Nat. \n:Nat.f (f n)) (\n:Nat. succ n)) 0""",
             calc.mkNat, calc.mkNatLit(4));
     evaluateAndTypeTest(""" \X. \x:X.x """, 
@@ -96,6 +104,8 @@ class Test extends FunSuite with ShouldMatchers {
     evaluateAndTypeTest(""" ((\X. \x:X.x) [Nat]) 0 """, calc.mkNat, calc.mkZero); // polymorphic identity applied to Nat applied to 0
     evaluateAndTypeTest(""" (\X. \f:X->X. (\a:X. f (f a)))""", 
             calc.mkTAll(calc.mkTArr(calc.mkTArr(calc.mkTVar(0,1),calc.mkTVar(0,1)),calc.mkTArr(calc.mkTVar(0,1),calc.mkTVar(0,1))),"X"), calc.mkTAbs(calc.mkAbs("f",calc.mkTArr(calc.mkTVar(0,1),calc.mkTVar(0,1)),calc.mkAbs("a",calc.mkTVar(1,2),calc.mkApp(calc.mkVar(1,3),calc.mkApp(calc.mkVar(1,3),calc.mkVar(0,3))))),"X")); // polymorphic double
+    
+    //Type and evaluate expression 25
     evaluateAndTypeTest(""" ((\X. \f:X->X. (\a:X. f (f a))) [Nat]) (\n:Nat. succ n) 0""", 
             calc.mkNat, calc.mkNatLit(2));// polymorphic double applied to Nat applied to succ
     evaluateAndTypeTest(""" \X. \t:X. (\f:X. t) """, 
@@ -107,6 +117,8 @@ class Test extends FunSuite with ShouldMatchers {
             calc.mkTArr(calc.mkTAll(calc.mkTArr(calc.mkTVar(0,1),calc.mkTArr(calc.mkTVar(0,1),calc.mkTVar(0,1))),"X"),calc.mkTAll(calc.mkTArr(calc.mkTVar(0,1),calc.mkTArr(calc.mkTVar(0,1),calc.mkTVar(0,1))),"X")),
             calc.mkAbs("b",calc.mkTAll(calc.mkTArr(calc.mkTVar(0,1),calc.mkTArr(calc.mkTVar(0,1),calc.mkTVar(0,1))),"X"),calc.mkTAbs(calc.mkAbs("t",calc.mkTVar(0,2),calc.mkAbs("f",calc.mkTVar(1,3),calc.mkApp(calc.mkApp(calc.mkTApp(calc.mkVar(3,4),calc.mkTVar(2,4)),calc.mkVar(0,4)),calc.mkVar(1,4)))),"X"))); // not: CBool -> CBool
     evaluateAndTypeTest(""" ((\b:All X. X->X->X. \X. \t:X. (\f:X. b [X] f t)) (\X. \t:X. (\f:X. t))) [Bool] true false """, calc.mkBool, calc.mkFalse); // (not tru) [Bool] true false
+    
+    //Type and evaluate expression 30
     evaluateAndTypeTest(""" ((\X. \x:X.x) [All X. X->X->X]) (\T. \x:T. (\y:T. x)) """, 
             calc.mkTAll(calc.mkTArr(calc.mkTVar(0,1),calc.mkTArr(calc.mkTVar(0,1),calc.mkTVar(0,1))),"X"), 
             calc.mkTAbs(calc.mkAbs("x",calc.mkTVar(0,1),calc.mkAbs("y",calc.mkTVar(1,2),calc.mkVar(1,3))),"X"));
@@ -125,6 +137,8 @@ class Test extends FunSuite with ShouldMatchers {
     evaluateAndTypeTest("""((\b:Bool.\X. \Y. \Z. \x:Z.b) true)[Nat][Bool]""", 
             calc.mkTAll(calc.mkTArr(calc.mkTVar(0,1),calc.mkBool), "Z"),
             calc.mkTAbs(calc.mkAbs("z",calc.mkTVar(0,1),calc.mkTrue),"Z"));
+    
+    //Type and evaluate expression 35
     evaluateAndTypeTest("""\x:Bool.(((\b:Bool.\X. \Y. \Z. \x:Z.b) true)[Nat][Bool])""", 
             calc.mkTArr(calc.mkBool, calc.mkTAll(calc.mkTArr(calc.mkTVar(0,1),calc.mkBool), "Z")),
             calc.mkAbs("x",calc.mkBool,calc.mkTApp(calc.mkTApp(calc.mkApp(calc.mkAbs("b",calc.mkBool,calc.mkTAbs(calc.mkTAbs(calc.mkTAbs(calc.mkAbs("z",calc.mkTVar(0,5),calc.mkVar(4,6)),"Z"),"Y"),"X")),calc.mkTrue),calc.mkNat),calc.mkBool)));
@@ -147,6 +161,9 @@ class Test extends FunSuite with ShouldMatchers {
             calc.mkCBool(0),
             null);
     //cand
+    
+    
+    //Type and evaluate expression 40
     evaluateAndTypeTest(
         """let cfalse : CBool = """ + calc.cfalseDef + """ in """ +
         """let ctrue : CBool = """ + calc.ctrueDef + """ in """ +
@@ -176,6 +193,8 @@ class Test extends FunSuite with ShouldMatchers {
         """cboolToBool (boolToCBool false)""", 
             calc.mkBool,
             calc.mkFalse);
+    
+    //Type and evaluate expression 45
     evaluateAndTypeTest(
         """let boolToCBool : Bool -> CBool = """ + calc.boolToCBool + """ in """ +
         """let cboolToBool : CBool -> Bool = """ + calc.cboolToBool + """ in """ +
@@ -204,6 +223,9 @@ class Test extends FunSuite with ShouldMatchers {
         calc.mkTArr(calc.mkNat,calc.mkCNat(0)),
         null);
     //cnatToNat
+    
+   
+    //Type and evaluate expression 50
     evaluateAndTypeTest(
         calc.cnatToNatDef,
         calc.mkTArr(calc.mkCNat(0),calc.mkNat),
@@ -243,6 +265,10 @@ class Test extends FunSuite with ShouldMatchers {
         calc.mkTArr(calc.mkCNat(0),calc.mkTArr(calc.mkCNat(0), calc.mkCNat(0))),
         null);
     //test ctimes
+    
+    
+    
+    //Type and evaluate expression 55
     evaluateAndTypeTest(
         """let czero : CNat = """ + calc.czeroDef + """ in """ +
         """let csucc : CNat -> CNat = """ + calc.csuccDef + """ in """ +
@@ -279,10 +305,15 @@ class Test extends FunSuite with ShouldMatchers {
     // test cnothing
     evaluateAndTypeTest(calc.cnothingDef, 
         parser.parseType("All X. CMaybe X"), null);
+    
     // test cjust
     evaluateAndTypeTest(calc.cjustDef,
         parser.parseType("All X. X -> CMaybe X"), null);
     // test cmaybe
+    
+    
+    
+    //Type and evaluate expression 60
     evaluateAndTypeTest(calc.cmaybeDef, calc.mkTAll(calc.mkTArr(calc.mkTVar(0,1),calc.mkTArr(calc.mkCMaybe(calc.mkTVar(0,1),1),calc.mkTVar(0,1))),"Y"), null);
     // test cmap
     evaluateAndTypeTest(
@@ -323,6 +354,9 @@ class Test extends FunSuite with ShouldMatchers {
         """let cnatToNat : CNat -> Nat = """ + calc.cnatToNatDef + """ in """ +
         """cnatToNat (cpred (csucc czero))""",
         calc.mkNat, calc.mkZero);
+    
+    
+    //Type and evaluate expression 65
     evaluateAndTypeTest(
         """let cnothing : All X. CMaybe X = """ + calc.cnothingDef + """ in """ +
         """let cjust : All X. X -> CMaybe X = """ + calc.cjustDef + """ in """ +
@@ -355,6 +389,9 @@ class Test extends FunSuite with ShouldMatchers {
         """cisnil [Bool] (cnil [Bool])""",
         calc.mkBool,
         calc.mkTrue);
+    
+    
+    //Type and evaluate expression 70
     evaluateAndTypeTest(
         """let cisnil : All X. CList X -> Bool = """ + calc.cisnilDef + """ in """ +
         """let cnil : All X. CList X = """ + calc.cnilDef + """ in """ +
@@ -387,6 +424,9 @@ class Test extends FunSuite with ShouldMatchers {
         calc.csndDef,
         parser.parseType("""All X. All Y. CPair X Y -> Y"""),
         null);
+    
+    
+    //Type and evaluate expression 75
     evaluateAndTypeTest(
         """let ccomma : All X. All Y. X -> Y -> CPair X Y = """ + calc.ccommaDef + """ in """ +
         """let cfst : All X. All Y. CPair X Y -> X = """ + calc.cfstDef + """ in """ +
@@ -447,6 +487,10 @@ class Test extends FunSuite with ShouldMatchers {
         """cnatToNat (cfib (csucc (csucc czero)))""",
         parser.parseType("""Nat"""),
         calc.mkNatLit(1));
+    
+    
+    
+    //Type and evaluate expression 80
     evaluateAndTypeTest(
         """let ccomma : All X. All Y. X -> Y -> CPair X Y = """ + calc.ccommaDef + """ in """ +
         """let cfst : All X. All Y. CPair X Y -> X = """ + calc.cfstDef + """ in """ +
@@ -512,6 +556,8 @@ class Test extends FunSuite with ShouldMatchers {
             """let cnil : All X. CList X = """ + calc.cnilDef + """ in """ +
             """let ccons : All X. X -> CList X -> CList X = """ + calc.cconsDef + """ in """ +
             """ccons [Nat] 5 (cnil [Nat])""")));
+    
+    //Type and evaluate expression 85
     evaluateAndTypeTest(
         """let ccomma : All X. All Y. X -> Y -> CPair X Y = """ + calc.ccommaDef + """ in """ +
         """let cfst : All X. All Y. CPair X Y -> X = """ + calc.cfstDef + """ in """ +
@@ -580,6 +626,9 @@ class Test extends FunSuite with ShouldMatchers {
             """let cnil : All X. CList X = """ + calc.cnilDef + """ in """ +
             """let ccons : All X. X -> CList X -> CList X = """ + calc.cconsDef + """ in """ +
             """ccons [Nat] 3 (ccons [Nat] 5 (ccons [Nat] 10 (cnil [Nat])))""")));
+    
+    
+    //Type and evaluate expression 90
     evaluateAndTypeTest(
         """let ccomma : All X. All Y. X -> Y -> CPair X Y = """ + calc.ccommaDef + """ in """ +
         """let cfst : All X. All Y. CPair X Y -> X = """ + calc.cfstDef + """ in """ +

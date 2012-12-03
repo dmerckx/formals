@@ -13,6 +13,8 @@ object Syntax {
     }
     
     // essentials
+    
+    //terms
     case class Var (i : Int, n : Int) extends Term {
       // note: i is the de Bruijn index, n is the total number of 
       // variables in scope for this term.  The second number is
@@ -20,8 +22,6 @@ object Syntax {
       // checking and debugging.
       override def isVal = true;
     }
-    case class TVar(i: Int, n: Int) extends Type
-    
     case class Abs(v : String, ty : Type, t : Term) extends Term {
       override def isVal = true;
       // alpha-equivalence...
@@ -30,6 +30,8 @@ object Syntax {
         case _ => false
         };
     }
+    case class App(f : Term, a : Term) extends Term;
+    
     case class TAbs(v : String, t : Term) extends Term {
       override def isVal = true;
       // alpha-equivalence...
@@ -38,13 +40,16 @@ object Syntax {
         case _ => false
         };
     }
+    case class TApp(f : Term, a : Type) extends Term;
+    
+    
+    //types
+    case class TVar(i: Int, n: Int) extends Type
+    case class TArr(t1 : Type, t2 : Type) extends Type;
     case class TUni(v : String, t : Type) extends Type;
     
     
-    case class App(f : Term, a : Term) extends Term;
-    case class TApp(f : Term, a : Type) extends Term;
     
-    case class TArr(t1 : Type, t2 : Type) extends Type;
     
     
     
