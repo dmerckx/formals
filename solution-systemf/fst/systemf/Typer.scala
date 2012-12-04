@@ -10,8 +10,8 @@ case object TypeException extends Exception;
 class Typer(tcalc: TypeCalculator) {
   type Context = List[Either[Type, Unit]]
   def typeOf(t: Term,ctx: Context): Type = {
-		println("term: " + t);
         println("context: " + ctx);
+		println("term: " + t);
 		t match {
                   case Zero => TNat                                          // T-ZERO
                   case Succ(t2) =>                                            // T-SUCC
@@ -37,29 +37,46 @@ class Typer(tcalc: TypeCalculator) {
                         val tT1 = typeOf(t1,ctx)
                         val tT2 = typeOf(t2,ctx)
                         tT1 match {
-                            case TArr(tT11,tT12) if tT11 == tT2 => tT12 
+                            case TArr(tT11,tT12) =>
+                            if(tT11 == tT2){
+                              tT12
+                            }
+                            else {
+	                            println(" Type left: " + tT11);
+	                            println(" Type right: " + tT12);
+                              throw TypeException
+                            }
                             case _ => throw TypeException
                         }
                   }
                   case TApp(t1, t2) => {										// T-TAPP
                 	   val tT1 = typeOf(t1, ctx)
                 	   tT1 match {
-                	     	case TUni(v, t12) => tcalc.typeSubstTop(t2, t12)
+                	     	case TUni(v, t12) =>
+                	     	  val t = tcalc.typeSubstTop(t2, t12)
+                	     	  println("type of TUni: " + t);
+                	     	  t
                             case _ => throw TypeException
                 	   }
                   }
                   case Var(i,n) => {											// T-VAR 
                     ctx(i) match {
-                      case Left(j) => j
+                      case Left(j) => 
+                        println("   -type: " + j);
+                        tcalc.tshift(j, i+1, 0)
                       case _ => throw TypeException
                     }
                   }
                   case Abs(nh,tT,t1) => {                                       // T-ABS
                         val tT1 = typeOf(t1,(Left(tT) :: ctx));
-                        TArr(tT,tT1)
+                        println("   type: " + tT1);
+                        
+                        TArr(tT,tcalc.tshift(tT1, -1, 0))
                   }
                   case TAbs(nh, t2) => {										// T-TABS
                         val tT2 = typeOf(t2,(Right() :: ctx));
+                        println("    TAbs type: " + tT2);
+                        
                         TUni(nh, tT2)
                   }
         }
