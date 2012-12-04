@@ -10,7 +10,9 @@ case object TypeException extends Exception;
 class Typer(tcalc: TypeCalculator) {
   type Context = List[Either[Type, Unit]]
   def typeOf(t: Term,ctx: Context): Type = {
-        t match {
+		println("term: " + t);
+        println("context: " + ctx);
+		t match {
                   case Zero => TNat                                          // T-ZERO
                   case Succ(t2) =>                                            // T-SUCC
                         if (typeOf(t2,ctx) == TNat) TNat 

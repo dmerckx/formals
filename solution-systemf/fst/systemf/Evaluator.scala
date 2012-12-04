@@ -21,20 +21,10 @@ class Evaluator(tcalc: TypeCalculator) {
                   case False => False
                   case If(t1, t2, t3) => If(shift(t1, d, c), shift(t2, d, c), shift(t3, d, c))                  
                   case App(t1, t2) =>  App(shift(t1, d, c), shift(t2, d, c))  
-                  case TApp(t1, t2) => TApp(shift(t1, d, c), tshift(t2, d, c))
+                  case TApp(t1, t2) => TApp(shift(t1, d, c), tcalc.tshift(t2, d, c))
                   case Var(i, n) => if (i<c) Var(i, n+d) else Var(i+d, n+d)
                   case Abs(nh, ty, t1) => Abs(nh, ty, shift(t1, d, c+1))
                   case TAbs(s, t) => TAbs(s, shift(t, d, c+1))
-          }
-    }
-    
-    def tshift(t:Type, d:Int, c:Int): Type = {
-          t match {
-                	case TBool => TBool
-                	case TNat => TNat
-                	case TArr(t1, t2) => TArr(tshift(t1, d, c), tshift(t2, d, c))
-                	case TVar(i, n) => if (i<c) TVar(i, n+d) else TVar(i+d, n+d)
-                	case TUni(s, t) => TUni(s, tshift(t, d, c+1))
           }
     }
     
@@ -71,14 +61,9 @@ class Evaluator(tcalc: TypeCalculator) {
                   case TApp(t1, t2) => TApp(tSubst(t1, v, s), t2)
                   case Var(i,n) => assert(i!=v); Var(i,n)
                   case Abs(nh,ty,t1) => {
-                    //TODO check
-                	  val newTy = ty match{
-                	  	case TVar(i,n) => if(i == v) s else ty  
-                	  	case _  => ty 
-                	  }
-                	  Abs(nh,newTy,tSubst(t1,v+1,tshift(s,1,0)))
+                	  Abs(nh,tcalc.uniSubst(ty, v, s),tSubst(t1,v+1,tcalc.tshift(s,1,0)))
                   	}
-                  case TAbs(nh, t) => TAbs(nh, tSubst(t, v+1, tshift(s, 1, 0)))
+                  case TAbs(nh, t) => TAbs(nh, tSubst(t, v+1, tcalc.tshift(s, 1, 0)))
           }
       
     }
@@ -88,7 +73,7 @@ class Evaluator(tcalc: TypeCalculator) {
     }
     
     def typeSubstTop(t:Term, s:Type): Term = {
-          shift(tSubst(t,0,tshift(s,1, 0)),-1,0)
+          shift(tSubst(t,0,tcalc.tshift(s,1, 0)),-1,0)
     }
     
     case object NoRuleApplies extends Exception;

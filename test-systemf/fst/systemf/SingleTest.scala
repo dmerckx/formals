@@ -65,8 +65,10 @@ class SingleTest extends FunSuite with ShouldMatchers {
         }
         i = i + 1
     }
-    evaluateAndTypeTest(""" ((\X. \x:X.x) [Nat]) """, calc.mkTArr(calc.mkNat,calc.mkNat), calc.mkAbs("x",calc.mkNat,calc.mkVar(0,1))); // polymorphic identity applied to Nat
     
+    evaluateAndTypeTest(""" (\X. \f:X->X. (\a:X. f (f a)))""", 
+            calc.mkTAll(calc.mkTArr(calc.mkTArr(calc.mkTVar(0,1),calc.mkTVar(0,1)),calc.mkTArr(calc.mkTVar(0,1),calc.mkTVar(0,1))),"X"), calc.mkTAbs(calc.mkAbs("f",calc.mkTArr(calc.mkTVar(0,1),calc.mkTVar(0,1)),calc.mkAbs("a",calc.mkTVar(1,2),calc.mkApp(calc.mkVar(1,3),calc.mkApp(calc.mkVar(1,3),calc.mkVar(0,3))))),"X")); // polymorphic double
+ 
     
     
 }
