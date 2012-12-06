@@ -39,38 +39,39 @@ class Calculus extends ICalculus[Term,Type,Unit,Unit] {
   override def mkPred(e: Term) = Pred(e);
   override def mkIsZero(e: Term) = IsZero(e);
   
-  override def mkFixp = notSupported;
+  override def mkFixp = Fixp();
   
   // TODO: implement
   // Church Booleans
   override def mkCBool(ctx: Int) : Type = mkTAll(mkTArr(mkTVar(0,ctx+1), mkTArr(mkTVar(0,ctx+1), mkTVar(0,ctx+1))), "X");
   def cfalseDef : String = """\X.\x:X.\y:X.y""";
-  def ctrueDef : String = notSupported;
-  def candDef : String = notSupported;
-  def boolToCBool : String = notSupported;
-  def cboolToBool : String = notSupported;
+
+  def ctrueDef : String = """\X.\x:X.\y:X.x""";
+  def candDef : String = """\b:CBool. \c:CBool. b[CBool] c (\X.\x:X.\y:X.y)""";
+  def boolToCBool : String = """\b:Bool. if b then (\X.\x:X.\y:X.x) else (\X.\x:X.\y:X.y)""";
+  def cboolToBool : String = """\b:CBool. b[Bool] true false""";
   
   // Church naturals
   // ctx is the number of variables in the current ctx, 
   // which you may need to return a correct type here.
-  override def mkCNat(ctx: Int) : Type = notSupported;
-  def czeroDef : String = notSupported;
-  def csuccDef : String = notSupported;
-  def natToCNatDef : String = notSupported;
-  def cnatToNatDef : String = notSupported;
-  def cplusDef : String = notSupported;
+  override def mkCNat(ctx: Int) : Type = mkTAll( mkTArr( mkTArr(mkTVar(0, ctx+1), mkTVar(0, ctx+1)), mkTArr(mkTVar(0, ctx+1), mkTVar(0, ctx+1))), "X");
+  def czeroDef : String = """\X. \s:X->X. \z:X. z""";
+  def csuccDef : String = """\n:CNat. \X. \s:X->X. \z:X. s (n[X] s z)""";
+  def natToCNatDef : String = """fixp[Nat->CNat]( \f:Nat->CNat. \n:Nat. \X. \s:X->X. \z:X. (if (iszero n) then z else s ((f (pred n))[X] s z  )    )  )""";
+  def cnatToNatDef : String = """\n:CNat. n[Nat] (\m:Nat. succ m) 0""";
+  def cplusDef : String = """\n:CNat. \m:CNat. \X. \s:X->X. \z:X. n[X] s (m[X] s z)""";
   
-  def ctimesDef : String = notSupported;
-  def cexpDef : String = notSupported;
+  def ctimesDef : String = """\n:CNat. \m:CNat. \X. \s:X->X. \z:X. n[X] (m[X] s) z""";
+  def cexpDef : String = """\n:CNat. \m:CNat. \X. m[ X->X ] (n[X])""";
 
   // Church Maybe
   // ctx is the number of variables in the current ctx, 
   // which you may need to return a correct type here.
-  override def mkCMaybe(x: Type, ctx: Int) : Type = notSupported;
-  def cnothingDef : String = notSupported;
-  def cjustDef : String = notSupported;
-  def cmaybeDef : String = notSupported;
-  def cmapDef : String = notSupported;
+  override def mkCMaybe(x: Type, ctx: Int) : Type = mkTAll( mkTArr(mkTVar(0,ctx+1), mkTArr(mkTArr(x, mkTVar(0, ctx+1)), mkTVar(0, ctx+1)  )  ), "X");
+  def cnothingDef : String = """\A. \X. \x:X. \y:A->X. x""";
+  def cjustDef : String = """\A. \a:A. \X. \x:X. \y:A->X. y a""";
+  def cmaybeDef : String = """\X. \a:X. \b:CMaybe X. b[X] a (\x:X. x)""";
+  def cmapDef : String = """\X. \Y. \f:X->Y. \c:CMaybe X.   \Z. \a:Z. \b:Y->Z.  c[Z] a (\x:X. b (f x))""";
 
   // Church pred
   def cpredDef : String = notSupported;

@@ -79,6 +79,9 @@ class Typer(tcalc: TypeCalculator) {
                         
                         TUni(nh, tT2)
                   }
+                  case Fixp() => {												// T-FIXP
+                	  TUni("T", TArr(   TArr(TVar(0,1),TVar(0,1))   ,  TVar(0,1)));
+                  }
         }
   }
   def typeOf(t: Term) : Type = typeOf(t, Nil);

@@ -25,6 +25,7 @@ class Evaluator(tcalc: TypeCalculator) {
                   case Var(i, n) => if (i<c) Var(i, n+d) else Var(i+d, n+d)
                   case Abs(nh, ty, t1) => Abs(nh, ty, shift(t1, d, c+1))
                   case TAbs(s, t) => TAbs(s, shift(t, d, c+1))
+                  case Fixp() => Fixp() 
           }
     }
     
@@ -45,6 +46,7 @@ class Evaluator(tcalc: TypeCalculator) {
                   case Var(i,n) => if (i==v) s else Var(i,n)
                   case Abs(nh,ty,t1) => Abs(nh,ty,subst(t1,v+1,shift(s,1,0)))
                   case TAbs(nh, t) => TAbs(nh, subst(t, v+1, shift(s, 1, 0)))
+                  case Fixp() => Fixp() 
           }
     }
     
@@ -64,6 +66,7 @@ class Evaluator(tcalc: TypeCalculator) {
                 	  Abs(nh,tcalc.uniSubst(ty, v, s),tSubst(t1,v+1,tcalc.tshift(s,1,0)))
                   	}
                   case TAbs(nh, t) => TAbs(nh, tSubst(t, v+1, tcalc.tshift(s, 1, 0)))
+                  case Fixp() => Fixp() 
           }
       
     }
@@ -97,7 +100,12 @@ class Evaluator(tcalc: TypeCalculator) {
 	
 	            // Pierce p. 72
 	            case App(Abs(nh,ty,t1),v2) if v2.isVal => termSubstTop(t1,v2)             // E-APPABS 
-	            case App(v1,t2) if v1.isVal => App(v1,eval1(t2))                          // E-APP2
+	            
+	            
+                case App(TApp(Fixp(), tT1), Abs(nh, ty, t2)) =>							  // E-FixBeta
+                  		termSubstTop(t2, App(TApp(Fixp(), tT1), Abs(nh, ty, t2)))
+	            
+                case App(v1,t2) if v1.isVal => App(v1,eval1(t2))                          // E-APP2
 	            case App(t1,t2) => App(eval1(t1),t2)                                      // E-APP1
 	            
 	            case TApp(TAbs(nh, t1), t2) => typeSubstTop(t1, t2)                       // E-TAPPTABS

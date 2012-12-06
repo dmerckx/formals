@@ -66,78 +66,13 @@ class SingleTest extends FunSuite with ShouldMatchers {
         i = i + 1
     }
     
-    def print(t:Term, i:Int){
-      t match{
-       	case Zero => println(sp(i) + "Zero");
-        case Succ(t2) =>
-          	println(sp(i) + "Succ(")
-          	print(t2,i+2);
-          	println(sp(i) + ")");
-        case Pred(t2) => 
-          	println(sp(i) + "Pred(")
-          	println(print(t2,i+2));
-          	println(sp(i) + ")");
-        case IsZero(t2) => 
-          	println(sp(i) + "IsZero(")
-          	print(t2,i+2);
-          	println(sp(i) + ")");
-        case True => println(sp(i) + "True");
-        case False => println(sp(i) + "False");
-        case If(t1, t2, t3) => 
-          	println(sp(i) + "If(")
-          	print(t2,i+2);
-          	println(sp(i) + "){");
-          	print(t2,i+2);
-          	println(sp(i) + "} else {");   
-          	print(t3,i+2);  
-          	println(sp(i) + "}");   
-        case App(t1, t2) =>  
-          	println(sp(i) + "App(")
-          	print(t1,i+2);
-          	println(sp(i) + ","); 
-          	print(t2,i+2);
-          	println(sp(i) + ")"); 
-        case TApp(t1, t2) => 
-          	println(sp(i) + "TApp(");
-          	print(t1,i+2);
-          	println(sp(i) + ","); 
-          	println(sp(i) + t2.toString());
-          	println(sp(i) + ")"); 
-        case Var(i, n) => 
-          	println(sp(i) + i + " - " + t.toString());
-        case Abs(nh, ty, t1) => 
-          	println(sp(i) + "Abs(");
-          	println(sp(i) + nh);
-          	println(sp(i) + ","); 
-          	println(sp(i) + ty.toString());
-          	println(sp(i) + ","); 
-          	print(t1, i+2); 
-          	println(sp(i) + ")");
-        case TAbs(s, t) => 
-          	println(sp(i) + "TAbs(");
-          	println(s);
-          	println(sp(i) + ","); 
-          	print(t, i+2); 
-          	println(sp(i) + ")");
-      }
-    }
     
-    def sp(i:Int):String = {
-      var ret = "";
-      var j = 0;
-      
-      while(j < i){
-        ret += " ";
-        j = j+1;
-      }
-      
-      return ret;
-    }
-    
-    
-    evaluateAndTypeTest(""" ((\X. \x:X.x) [All X. X->X->X]) (\T. \x:T. (\y:T. x)) """, 
-            calc.mkTAll(calc.mkTArr(calc.mkTVar(0,1),calc.mkTArr(calc.mkTVar(0,1),calc.mkTVar(0,1))),"X"), 
-            calc.mkTAbs(calc.mkAbs("x",calc.mkTVar(0,1),calc.mkAbs("y",calc.mkTVar(1,2),calc.mkVar(1,3))),"X"));
-    
+   
+    evaluateAndTypeTest(
+        """let czero : CNat = """ + calc.czeroDef + """ in """ +
+        """let csucc : CNat -> CNat = """ + calc.csuccDef + """ in """ +
+        calc.natToCNatDef,
+        calc.mkTArr(calc.mkNat,calc.mkCNat(0)),
+        null);
     
 }

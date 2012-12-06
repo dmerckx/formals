@@ -40,7 +40,13 @@ object Syntax {
         case _ => false
         };
     }
-    case class TApp(f : Term, a : Type) extends Term;
+    
+    case class TApp(f : Term, a : Type) extends Term{
+      override def isVal = f match {
+        case Fixp() => true
+        case _ => false
+      };
+    }
     
     
     //types
@@ -78,4 +84,10 @@ object Syntax {
     }
     case class Pred(e : Term) extends Term;
     case class IsZero(e : Term) extends Term;
+    
+    
+    // general recursion
+    case class Fixp() extends Term{
+      override def isVal = true;
+    }
 }
