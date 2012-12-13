@@ -60,7 +60,7 @@ class Evaluator(tcalc: TypeCalculator) {
                   case False => False
                   case If(t1,t2,t3) => If(tSubst(t1,v,s),tSubst(t2,v,s),tSubst(t3,v,s))
                   case App(t1,t2) => App(tSubst(t1,v,s),tSubst(t2,v,s))
-                  case TApp(t1, t2) => TApp(tSubst(t1, v, s), t2)
+                  case TApp(t1, t2) => TApp(tSubst(t1, v, s), tcalc.uniSubst(t2, v, s))
                   case Var(i,n) => assert(i!=v); Var(i,n)
                   case Abs(nh,ty,t1) => {
                 	  Abs(nh,tcalc.uniSubst(ty, v, s),tSubst(t1,v+1,tcalc.tshift(s,1,0)))
@@ -81,8 +81,11 @@ class Evaluator(tcalc: TypeCalculator) {
     
     case object NoRuleApplies extends Exception;
     
+    var lastT:Term = null;
+    
     // one step evaluation
     def eval1(t:Term): Term = {
+    	lastT = t;
             t match {
 	            // Pierce p. 34
 	            case If(True,t2,t3) => t2                                                 // E-IFTRUE
@@ -99,7 +102,10 @@ class Evaluator(tcalc: TypeCalculator) {
 	            case IsZero(t1) => IsZero(eval1(t1))                                      // E-ISZERO
 	
 	            // Pierce p. 72
-	            case App(Abs(nh,ty,t1),v2) if v2.isVal => termSubstTop(t1,v2)             // E-APPABS 
+	            case App(Abs(nh,ty,t1),v2) if v2.isVal =>
+	              //println("arg1: " + Abs(nh, ty, t1));
+	              //println("arg2: " + v2);
+	              termSubstTop(t1,v2)             										  // E-APPABS 
 	            
 	            
                 case App(TApp(Fixp(), tT1), Abs(nh, ty, t2)) =>							  // E-FixBeta
@@ -122,15 +128,27 @@ class Evaluator(tcalc: TypeCalculator) {
             try {
             	val tt = eval1(t)
             	
-            	
                 try{
                  val typer = new Typer(new TypeCalculator());
                  typer.typeOf(tt);
+            	
+	            	if(typer.typeOf(t) != typer.typeOf(tt)){
+	            		println("Types niet langer hetzelfde");
+	            		throw new IllegalArgumentException;
+	            	}
                 }
             	catch{
-            	  case _ => 
+            	  case AppTypeException(tBase, t1, t2, tT1, tT2, ctx) => 
             	    println("Term before: " + t);
+            	    println("Failed on: " + lastT);
             	    println("Term exception : " + tt);
+            	    println("----------------------");
+            	    println("base term: " + tBase);
+            	    println("t1: " + t1);
+            	    println("t2: " + t2);
+            	    println("type t1: " + tT1);
+            	    println("type t2: " + tT2);
+            	    println("context: " + ctx);
             	    throw new IllegalArgumentException;
             	}
             	

@@ -26,7 +26,7 @@ object REPLMain {
           Console.println("failed parse");
           Console.println(failure);
         }
-        case TypeException => Console.println("Type error.")
+        case TypeException(baseTerm, term, typ, _) => Console.println("Type error." + "base term: " + baseTerm + " \nterm: " + term + " \ntype: " + typ)
         case NotSupportedException => Console.println("Unsupported feature.")
       }
     }

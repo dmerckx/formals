@@ -70,9 +70,49 @@ class SingleTest extends FunSuite with ShouldMatchers {
         i = i + 1
     }
     
+    evaluateAndTypeTest(
+        """let ccomma : All X. All Y. X -> Y -> CPair X Y = """ + calc.ccommaDef + """ in """ +
+        """let cfst : All X. All Y. CPair X Y -> X = """ + calc.cfstDef + """ in """ +
+        """let csnd : All X. All Y. CPair X Y -> Y = """ + calc.csndDef + """ in """ +
+        """let cnil : All X. CList X = """ + calc.cnilDef + """ in """ +
+        """let ccons : All X. X -> CList X -> CList X = """ + calc.cconsDef + """ in """ +
+        """let cinsert : All X. (X -> X -> Bool) -> CList X -> X -> CList X = """ + calc.cinsertDef + """ in """ +
+        """let lt : Nat -> Nat -> Bool = fixp [Nat -> Nat -> Bool] (\rec : Nat -> Nat -> Bool. \x : Nat. \y : Nat. if iszero y then false else (if iszero x then true else rec (pred x) (pred y))) in """ +
+        """cinsert [Nat] lt (ccons [Nat] 0 (ccons [Nat] 1 (cnil [Nat]))) 2""",
+        parser.parseType("""CList Nat"""),
+        eval.eval(parser.parseTerm(
+            """let cnil : All X. CList X = """ + calc.cnilDef + """ in """ +
+            """let ccons : All X. X -> CList X -> CList X = """ + calc.cconsDef + """ in """ +
+            """ccons [Nat] 0 (ccons [Nat] 1 (ccons [Nat] 2 (cnil [Nat])))""")));
     
-   
-    evaluateAndTypeTest(""" ((\b:All X. X->X->X. \X. \t:X. (\f:X. b [X] f t)) (\X. \t:X. (\f:X. t))) [Bool] true false """, calc.mkBool, calc.mkFalse); // (not tru) [Bool] true false
+    /*
+    evaluateAndTypeTest(
+        """let ccomma : All X. All Y. X -> Y -> CPair X Y = """ + calc.ccommaDef + """ in """ +
+        """let cfst : All X. All Y. CPair X Y -> X = """ + calc.cfstDef + """ in """ +
+        """let csnd : All X. All Y. CPair X Y -> Y = """ + calc.csndDef + """ in """ +
+        """let cnil : All X. CList X = """ + calc.cnilDef + """ in """ +
+        """let ccons : All X. X -> CList X -> CList X = """ + calc.cconsDef + """ in """ +
+        """let cinsert : All X. (X -> X -> Bool) -> CList X -> X -> CList X = """ + calc.cinsertDef + """ in """ +
+        """let lt : Nat -> Nat -> Bool = fixp [Nat -> Nat -> Bool] (\rec : Nat -> Nat -> Bool. \x : Nat. \y : Nat. if iszero y then false else (if iszero x then true else rec (pred x) (pred y))) in """ +
+        """if csnd [Bool][Bool] (ccomma[Bool][Bool] false true) then true else false""",
+        parser.parseType("""Bool"""),
+        eval.eval(parser.parseTerm("""true""")));
+        */
     
-    
+    /*
+    evaluateAndTypeTest(
+        """let ccomma : All X. All Y. X -> Y -> CPair X Y = """ + calc.ccommaDef + """ in """ +
+        """let cfst : All X. All Y. CPair X Y -> X = """ + calc.cfstDef + """ in """ +
+        """let csnd : All X. All Y. CPair X Y -> Y = """ + calc.csndDef + """ in """ +
+        """let cnil : All X. CList X = """ + calc.cnilDef + """ in """ +
+        """let ccons : All X. X -> CList X -> CList X = """ + calc.cconsDef + """ in """ +
+        """let cinsert : All X. (X -> X -> Bool) -> CList X -> X -> CList X = """ + calc.cinsertDef + """ in """ +
+        """let cisort : All X. (X -> X -> Bool) -> CList X -> CList X = """ + calc.cisortDef + """ in """ +
+        """let lt : Nat -> Nat -> Bool = fixp [Nat -> Nat -> Bool] (\rec : Nat -> Nat -> Bool. \x : Nat. \y : Nat. if iszero y then false else (if iszero x then true else rec (pred x) (pred y))) in """ +
+        """cisort [Nat] lt (ccons [Nat] 10 (ccons [Nat] 5 (ccons [Nat] 3 (cnil [Nat]))))""",
+        parser.parseType("""CList Nat"""),
+        eval.eval(parser.parseTerm(
+            """let cnil : All X. CList X = """ + calc.cnilDef + """ in """ +
+            """let ccons : All X. X -> CList X -> CList X = """ + calc.cconsDef + """ in """ +
+            """ccons [Nat] 3 (ccons [Nat] 5 (ccons [Nat] 10 (cnil [Nat])))""")));*/
 }
