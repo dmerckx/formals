@@ -10,8 +10,6 @@ case object TypeException extends Exception;
 class Typer(tcalc: TypeCalculator) {
   type Context = List[Either[Type, Unit]]
   def typeOf(t: Term,ctx: Context): Type = {
-        println("context: " + ctx);
-		println("term: " + t);
 		t match {
                   case Zero => TNat                                          // T-ZERO
                   case Succ(t2) =>                                            // T-SUCC
@@ -42,8 +40,6 @@ class Typer(tcalc: TypeCalculator) {
                               tT12
                             }
                             else {
-	                            println(" Type left: " + tT11);
-	                            println(" Type right: " + tT12);
                               throw TypeException
                             }
                             case _ => throw TypeException
@@ -54,7 +50,6 @@ class Typer(tcalc: TypeCalculator) {
                 	   tT1 match {
                 	     	case TUni(v, t12) =>
                 	     	  val t = tcalc.typeSubstTop(t2, t12)
-                	     	  println("type of TUni: " + t);
                 	     	  t
                             case _ => throw TypeException
                 	   }
@@ -62,20 +57,17 @@ class Typer(tcalc: TypeCalculator) {
                   case Var(i,n) => {											// T-VAR 
                     ctx(i) match {
                       case Left(j) => 
-                        println("   -type: " + j);
                         tcalc.tshift(j, i+1, 0)
                       case _ => throw TypeException
                     }
                   }
                   case Abs(nh,tT,t1) => {                                       // T-ABS
                         val tT1 = typeOf(t1,(Left(tT) :: ctx));
-                        println("   type: " + tT1);
                         
                         TArr(tT,tcalc.tshift(tT1, -1, 0))
                   }
                   case TAbs(nh, t2) => {										// T-TABS
                         val tT2 = typeOf(t2,(Right() :: ctx));
-                        println("    TAbs type: " + tT2);
                         
                         TUni(nh, tT2)
                   }

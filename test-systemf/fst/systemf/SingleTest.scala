@@ -42,10 +42,14 @@ class SingleTest extends FunSuite with ShouldMatchers {
 		    	
 		    	println(in);
 		    	println("After parsing: " + e);
+		    	
 		    	println("");
 		    	println("Expected type: " + ty);
 		    	println("Type found: " + typer.typeOf(e));
 		    	println("Expected eval: " + out);
+		    	
+		    	println("!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!");
+				
 		    	println("Eval found: " + eval.eval(e));
 		    	
 				println("");
@@ -68,11 +72,7 @@ class SingleTest extends FunSuite with ShouldMatchers {
     
     
    
-    evaluateAndTypeTest(
-        """let czero : CNat = """ + calc.czeroDef + """ in """ +
-        """let csucc : CNat -> CNat = """ + calc.csuccDef + """ in """ +
-        calc.natToCNatDef,
-        calc.mkTArr(calc.mkNat,calc.mkCNat(0)),
-        null);
+    evaluateAndTypeTest(""" ((\b:All X. X->X->X. \X. \t:X. (\f:X. b [X] f t)) (\X. \t:X. (\f:X. t))) [Bool] true false """, calc.mkBool, calc.mkFalse); // (not tru) [Bool] true false
+    
     
 }

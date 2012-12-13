@@ -12,6 +12,7 @@ import Syntax._;
 class Calculus extends ICalculus[Term,Type,Unit,Unit] {
   
   val parser = new Parser(this);
+  val typer = new TypeCalculator();
   
   type Term = Syntax.Term;
   type Type = Syntax.Type;
@@ -67,35 +68,62 @@ class Calculus extends ICalculus[Term,Type,Unit,Unit] {
   // Church Maybe
   // ctx is the number of variables in the current ctx, 
   // which you may need to return a correct type here.
-  override def mkCMaybe(x: Type, ctx: Int) : Type = mkTAll( mkTArr(mkTVar(0,ctx+1), mkTArr(mkTArr(x, mkTVar(0, ctx+1)), mkTVar(0, ctx+1)  )  ), "X");
+  override def mkCMaybe(x: Type, ctx: Int) : Type = {
+    mkTAll( mkTArr(mkTVar(0,ctx+1), mkTArr(mkTArr(typer.tshift(x, 1, 0), mkTVar(0, ctx+1)), mkTVar(0, ctx+1)  )  ), "Z");
+  }
   def cnothingDef : String = """\A. \X. \x:X. \y:A->X. x""";
   def cjustDef : String = """\A. \a:A. \X. \x:X. \y:A->X. y a""";
   def cmaybeDef : String = """\X. \a:X. \b:CMaybe X. b[X] a (\x:X. x)""";
   def cmapDef : String = """\X. \Y. \f:X->Y. \c:CMaybe X.   \Z. \a:Z. \b:Y->Z.  c[Z] a (\x:X. b (f x))""";
 
   // Church pred
-  def cpredDef : String = notSupported;
+  def cpredDef : String = """\n:CNat. \X. \s:X->X. \z:X.
+		  							let r : CMaybe X -> CMaybe X = \a:CMaybe X. \Z. \i:Z. \f:X->Z. f (a[X] z s) in  
+		  							(n[CMaybe X] r (\Y. \x:Y. \y:X->Y. x) ) [X] z (\x:X. x)""";
 
   // Church lists
   // ctx is the number of variables in the current ctx, 
   // which you may need to return a correct type here.
-  override def mkCList(x: Type, ctx: Int) : Type = notSupported;
-  def cisnilDef : String = notSupported;
-  def cnilDef : String = notSupported;
-  def cconsDef : String = notSupported;
+  override def mkCList(x: Type, ctx: Int) : Type ={
+	mkTAll(mkTArr(mkTArr(typer.tshift(x, 1, 0), mkTArr(mkTVar(0, ctx+1), mkTVar(0, ctx+1))), mkTArr(mkTVar(0, ctx+1), mkTVar(0, ctx+1))), "R")
+  }
+  def cisnilDef : String = """\X. \l:CList X. l[Bool] (\hd:X. \tl:Bool. false) true""";
+  def cnilDef : String = """\X. \R. \c:X->R->R. \n:R. n""";
+  def cconsDef : String = """\X. \hd:X. \tl:CList X. (\R. \c:X->R->R. \n:R. c hd (tl[R] c n))""";
 
   // Church pairs
   // ctx is the number of variables in the current ctx, 
   // which you may need to return a correct type here.
-  override def mkCPair(x: Type, y: Type, ctx: Int) : Type = notSupported;
-  def ccommaDef : String = notSupported;
-  def cfstDef : String = notSupported;
-  def csndDef : String = notSupported;
+  override def mkCPair(x: Type, y: Type, ctx: Int) : Type ={
+   mkTAll(mkTArr(mkTArr(typer.tshift(x, 1, 0),  mkTArr(typer.tshift(y, 1, 0), mkTVar(0, ctx+1))  ), mkTVar(0, ctx+1)), "R") 
+  }
+  def ccommaDef : String = """\X. \Y. \x:X. \y:Y. \R. \f:X->Y->R. f x y""";
+  def cfstDef : String = """\X. \Y. \p:CPair X Y. p[X] (\x:X. \y:Y. x)""";
+  def csndDef : String = """\X. \Y. \p:CPair X Y. p[Y] (\x:X. \y:Y. y)""";
 
   // fibonacci
-  def cfibDef : String = notSupported;
+  def cfibDef : String = """let f:CPair CNat CNat->CPair CNat CNat = \p:CPair CNat CNat. ccomma[CNat][CNat] (csnd[CNat][CNat] p) (cplus (cfst[CNat][CNat] p) (csnd[CNat][CNat] p)) in
+		  					\n:CNat. cfst[CNat][CNat] ( n[CPair CNat CNat] f (ccomma[CNat][CNat] czero (csucc czero)) )""";
 
   // insertion sort
-  def cinsertDef : String = notSupported;
-  def cisortDef : String = notSupported;
+  def cinsertDef : String = """ \X. \lt:X->X->Bool. \l:CList X. \x:X. 
+		  						let f : X -> CPair (CList X) Bool -> CPair (CList X) Bool
+		  							= \h:X. \p:CPair (CList X) Bool. 
+		  								let t:CList X = cfst[CList X][Bool] p in
+		  									if (csnd[CList X][Bool] p)
+		  									then ccons[X] h t
+		  									else 
+		  										if (lt x h)
+		  										then ccomma[CList X][Bool] (ccons[X] h t) false
+		  										else ccomma[CList X][Bool] (ccons[X] h (ccons[X] x t)) true
+		  						in let r : CPair (CList X) Bool
+		  							= l[CPair (CList X) Bool] f (ccomma[CList X][Bool] (cnil[X]) false)
+		  						in if (csnd[CList X][Bool] r)
+		  							then cfst[CList X][Bool] r
+		  							else ccons[X] x (cfst[CList X][Bool] r)
+		  					""";
+  def cisortDef : String = """\X. \lt:X->X->Bool. \l:CList X. 
+		  						let ins : X -> CList X -> CList X
+		  							= \x:X. \t:CList X. cinsert[X] lt t x
+		  						in l[CList X] ins (cnil[X])""";
 }

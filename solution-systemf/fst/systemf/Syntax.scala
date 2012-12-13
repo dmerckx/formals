@@ -50,7 +50,7 @@ object Syntax {
     
     
     //types
-    case class TVar(i: Int, n: Int) extends Type
+    case class TVar(i: Int, n: Int) extends Type;
     case class TArr(t1 : Type, t2 : Type) extends Type;
     case class TUni(v : String, t : Type) extends Type{
       override def equals(o2 : Any) = o2 match {

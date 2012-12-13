@@ -120,7 +120,20 @@ class Evaluator(tcalc: TypeCalculator) {
     // evaluation to normal form
     def eval(t:Term): Term = {
             try {
-                val tt = eval1(t)
+            	val tt = eval1(t)
+            	
+            	
+                try{
+                 val typer = new Typer(new TypeCalculator());
+                 typer.typeOf(tt);
+                }
+            	catch{
+            	  case _ => 
+            	    println("Term before: " + t);
+            	    println("Term exception : " + tt);
+            	    throw new IllegalArgumentException;
+            	}
+            	
                 eval(tt)
             }
             catch { 
